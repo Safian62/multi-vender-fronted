@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import styles from "../styles/style";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import styles from "../../styles/style.js";
 import axios from "axios";
 import { toast } from "react-toastify";
-const { server } = require("../server");
+import { server} from '../../server.js'
 
-const Login = () => {
+const ShopLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await axios
       .post(
-        `${server}/user/login-user`,
+        `${server}/shop/login-shop`,
         {
           email,
           password,
@@ -24,7 +24,6 @@ const Login = () => {
       )
       .then((resp) => {
         toast.success("Login success!");
-        navigate("/");
         window.location.reload(true)
       })
       .catch((err) => {
@@ -38,7 +37,7 @@ const Login = () => {
     <div className=" min-h-screen bg-gray-100 flex flex-col justify-start py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-4 text-center text-3xl font-extrabold text-gray-900">
-          Login to your account
+          Login to your Shop
         </h2>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -138,7 +137,7 @@ const Login = () => {
             {/*SIGN UP*/}
             <div className={`${styles.normalFlex} w-full`}>
               <h4>Not have any account?</h4>
-              <Link to="/sign-up" className="text-blue-500 pl-2">
+              <Link to="/shop-create" className="text-blue-500 pl-2">
                 {" "}
                 Sign Up{" "}
               </Link>
@@ -150,4 +149,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ShopLogin;
