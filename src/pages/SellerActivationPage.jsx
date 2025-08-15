@@ -12,7 +12,7 @@ const SellerActivationPage = () => {
     if (activation_token) {
       const activationEmail = async () => {
         try {
-          const resp = await axios.post(`${server}/shop/shop/activation`, {
+          const resp = await axios.post(`${server}/shop/activation`, {
             activation_token,
           });
           console.log(resp.data.message);

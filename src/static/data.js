@@ -23,6 +23,7 @@ export const navItems = [
   },
 ];
 
+
 // branding data
 export const brandingData = [
   {

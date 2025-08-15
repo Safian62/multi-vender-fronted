@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../../styles/style.js";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -10,7 +10,7 @@ const ShopLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     await axios
@@ -24,6 +24,7 @@ const ShopLogin = () => {
       )
       .then((resp) => {
         toast.success("Login success!");
+        navigate('/dashboard')
         window.location.reload(true)
       })
       .catch((err) => {
