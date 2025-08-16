@@ -18,11 +18,16 @@ import {
   ShopLoginPage,
   OrderSuccessPage,
   PaymentPage,
-  CheckoutPage
-
-
-} from './protectedRout/Routes.js';
-import { ShopDashboardPage,ShopHomePage,ShopCreateProduct,ShopAllProducts} from './protectedRout/ShopRout.js'
+  CheckoutPage,
+} from "./protectedRout/Routes.js";
+import {
+  ShopDashboardPage,
+  ShopHomePage,
+  ShopCreateProduct,
+  ShopAllProducts,
+  ShopCreateEvents,
+  ShopAllEvents
+} from "./protectedRout/ShopRout.js";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Store from "./redux/store";
@@ -35,7 +40,7 @@ import Loader from "./components/layout/loader.jsx";
 
 const App = () => {
   const { loading, isAuthenticated } = useSelector((state) => state.user);
-  const { isLoading,isSeller} = useSelector((state) => state.seller);
+  const { isLoading, isSeller } = useSelector((state) => state.seller);
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadShop());
@@ -43,7 +48,7 @@ const App = () => {
   return (
     <>
       {loading || isLoading ? (
-        <Loader/>
+        <Loader />
       ) : (
         <BrowserRouter>
           <Routes>
@@ -63,13 +68,16 @@ const App = () => {
             <Route path="/best-selling" element={<BestSellingPage />} />
             <Route path="events" element={<EventsPage />} />
             <Route path="/faq" element={<FaqPage />} />
-            <Route path="/checkout" element={
-              <ProtectedRout>
-                <CheckoutPage/>
-              </ProtectedRout>
-            } />
-            <Route path="/payment" element={<PaymentPage/>}/>
-            <Route path="/order/success/:id" element ={<OrderSuccessPage/>} />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRout>
+                  <CheckoutPage />
+                </ProtectedRout>
+              }
+            />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/order/success/:id" element={<OrderSuccessPage />} />
             <Route
               path="/profile"
               element={
@@ -84,8 +92,7 @@ const App = () => {
             <Route
               path="/shop/:id"
               element={
-                <SellerProtectedRout isSeller={isSeller}
-                >
+                <SellerProtectedRout isSeller={isSeller}>
                   <ShopHomePage />
                 </SellerProtectedRout>
               }
@@ -93,8 +100,7 @@ const App = () => {
             <Route
               path="/dashboard"
               element={
-                <SellerProtectedRout isSeller={isSeller}
-                >
+                <SellerProtectedRout isSeller={isSeller}>
                   <ShopDashboardPage />
                 </SellerProtectedRout>
               }
@@ -102,8 +108,7 @@ const App = () => {
             <Route
               path="/dashboard-create-product"
               element={
-                <SellerProtectedRout isSeller={isSeller}
-                >
+                <SellerProtectedRout isSeller={isSeller}>
                   <ShopCreateProduct />
                 </SellerProtectedRout>
               }
@@ -111,13 +116,28 @@ const App = () => {
             <Route
               path="/dashboard-products"
               element={
-                <SellerProtectedRout isSeller={isSeller}
-                >
+                <SellerProtectedRout isSeller={isSeller}>
                   <ShopAllProducts />
                 </SellerProtectedRout>
               }
             />
-            
+            <Route
+              path="/dashboard-create-event"
+              element={
+                <SellerProtectedRout isSeller={isSeller}>
+                  <ShopCreateEvents />
+                </SellerProtectedRout>
+              }
+            />
+             
+            <Route
+              path="/dashboard-events"
+              element={
+                <SellerProtectedRout isSeller={isSeller}>
+                  <ShopAllEvents />
+                </SellerProtectedRout>
+              }
+            />
           </Routes>
           <ToastContainer
             position="bottom-center"

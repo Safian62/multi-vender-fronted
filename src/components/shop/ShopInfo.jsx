@@ -3,8 +3,13 @@ import { useSelector } from "react-redux";
 import { Avatar } from "../../assests/asset";
 import { backend_url } from "../../server";
 import styles from "../../styles/style";
+import axios from "axios";
+import { server } from "../../server";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ShopInfo = ({ isOwner }) => {
+  const navigate = useNavigate()
   const { seller } = useSelector((state) => state.seller);
   const avatarUrl = seller?.avatar?.url;
   const fullAvatarUrl =
@@ -13,7 +18,18 @@ const ShopInfo = ({ isOwner }) => {
       : avatarUrl || Avatar;
 
       const logoutHandler = ()=>{
-        
+          axios
+      .get(`${server}/shop/logout`, { withCredentials: true })
+      .then((resp) => {
+        toast.success(resp.data.message);
+        window.location.reload(true);
+
+        navigate("/shop-login");
+      })
+      .catch((error) => {
+        const message = error?.response?.data?.message || "Logout failed";
+        toast.warning(message);
+      });
       }
 
   return (

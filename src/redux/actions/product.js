@@ -24,3 +24,47 @@ export const createProduct = (newForm) => async (dispatch) => {
     });
   }
 };
+
+// GET ALL PRODUCTS
+
+export const getAllProductsShop = (id) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "getAllProductsShopRequest",
+    });
+    const { data } = await axios.get(
+      `${server}/product/get-all-products-shop/${id}`
+    );
+    dispatch({
+      type: "getAllProductsShopSuccess",
+      payload: data.products,
+    });
+  } catch (error) {
+    dispatch({
+      type: "getAllProductsShopFailed",
+      payload: error.response.data.message,
+    });
+  }
+};
+
+// DELETE A PRODUCT
+export const deleteProduct = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: "deleteProductRequest" });
+
+    await axios.delete(`${server}/product/delete-shop-product/${id}`, {
+      withCredentials: true,
+    });
+
+    // Id payload me bhejo, taake reducer array filter kare
+    dispatch({
+      type: "deleteProductSuccess",
+      payload: id,
+    });
+  } catch (error) {
+    dispatch({
+      type: "deleteProductFailed",
+      payload: error.response?.data?.message || error.message,
+    });
+  }
+};
