@@ -1,8 +1,7 @@
 import axios from "axios";
-import {server} from "../../server";
+import { server } from "../../server";
 
 // LOAD USER
-
 export const loadUser = () => async (dispatch) => {
   try {
     dispatch({
@@ -24,7 +23,6 @@ export const loadUser = () => async (dispatch) => {
 };
 
 // LOAD SHOP
-
 export const loadShop = () => async (dispatch) => {
   try {
     dispatch({
@@ -41,6 +39,91 @@ export const loadShop = () => async (dispatch) => {
     dispatch({
       type: "LoadSellerFail",
       payload: error.response?.data.message || "Some thing went wrong",
+    });
+  }
+};
+
+//UPDATDE USER DETAILS
+export const updateUserInfo =
+  (email, password, phoneNumber, name) => async (dispatch) => {
+    try {
+      dispatch({
+        type: "updateUserInfoRequest",
+      });
+      const { data } = await axios.put(
+        `${server}/user/update-user-info`,
+        {
+          email,
+          password,
+          phoneNumber,
+          name,
+        },
+        { withCredentials: true }
+      );
+      dispatch({
+        type: "updateUserInfoSuccess",
+        payload: data.user,
+      });
+    } catch (error) {
+      dispatch({
+        type: "updateUserInfoFail",
+        payload: error.response.data.message,
+      });
+    }
+  };
+
+// UPDATE USER ADDRESSES
+
+export const updateUserAddress =
+  (country, province, city, address1,zipCode, address2, addressType) =>
+  async (dispatch) => {
+    try {
+      dispatch({ type: "updateUserAddressRequest" });
+
+      const { data } = await axios.put(
+        `${server}/user/update-user-addresses`,
+        { country, province, city, address1,zipCode, address2, addressType },
+        { withCredentials: true }
+      );
+
+      dispatch({
+        type: "updateUserAddressSuccess",
+        payload: {
+          successMessage: "User Address Updated Successfully!",
+          user: data.user,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: "updateUserAddressFail",
+        payload: error.response?.data?.message || error.message,
+      });
+    }
+  };
+
+// DELETE USER ADDRESSSES
+
+export const deleteUserAddress = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: "deleteUserAddressRequest" });
+
+    const { data } = await axios.delete(
+      `${server}/user/delete-user-address/:${id}`,
+
+      { withCredentials: true }
+    );
+
+    dispatch({
+      type: "deleteUserAddressSuccess",
+      payload: {
+        successMessage: "User Address deleted Successfully!",
+        user: data.user,
+      },
+    });
+  } catch (error) {
+    dispatch({
+      type: "deleteUserAddressFail",
+      payload: error.response?.data?.message || error.message,
     });
   }
 };

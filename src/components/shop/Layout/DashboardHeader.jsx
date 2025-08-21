@@ -30,7 +30,7 @@ const DashboardHeader = () => {
       <div className="flex items-center">
         <div className="flex items-center mr-4">
           {/* GITF COUPONS */}
-          <Link to="/dashboard-cupons" className="800px:block hidden">
+          <Link to="/dashboard-coupons" className="800px:block hidden">
             <AiOutlineGift
               color="#555"
               size={30}

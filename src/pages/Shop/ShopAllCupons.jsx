@@ -1,8 +1,8 @@
 import React from 'react'
 import DashboardHeader from '../../components/shop/Layout/DashboardHeader'
 import DashboardSideBar from '../../components/shop/Layout/DashboardSideBar'
-import AllCupons from '../../components/shop/Layout/AllCupons'
-const ShopAllCupons = () => {
+import Allcoupons from '../../components/shop/Layout/AllCupons'
+const ShopAllcoupons = () => {
   return (
     <div>
       <DashboardHeader />
@@ -11,11 +11,11 @@ const ShopAllCupons = () => {
           <DashboardSideBar active={9} />
         </div>
         <div className="w-full justify-center flex">
-          <AllCupons/>
+          <Allcoupons/>
         </div>
       </div>
     </div>
   )
 }
 
-export default ShopAllCupons
+export default ShopAllcoupons

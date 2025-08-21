@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../../styles/style";
 import ProductDetailCard from "../ProductDetailCard/ProductDetailCard.jsx";
+import { backend_url } from "../../../server.js";
 import {
   AiFillHeart,
   AiFillStar,
@@ -10,112 +11,146 @@ import {
   AiOutlineShoppingCart,
   AiOutlineStar,
 } from "react-icons/ai";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addToWishList,
+  removeFromWishList,
+} from "../../../redux/actions/wishList.js";
+import { addToCart } from "../../../redux/actions/cart.js";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ data }) => {
+  const { wishList } = useSelector((state) => state.wishList);
+  const { cart } = useSelector((state) => state.cart);
+
   const [click, setClick] = useState(false);
   const [open, setOpen] = useState(false);
-  const d = data.name;
-  const productName = data?.name?.replace(/\s+/g, "-") || "unknown-product";
+  useEffect(() => {
+    if (wishList && wishList.find((i) => i._id === data._id)) {
+      setClick(true);
+    } else {
+      setClick(false);
+    }
+  }, [wishList]);
+
+  // Safe access with optional chaining and default values
+  const imageUrl = data?.images?.[0] ? `${backend_url}/${data.images[0]}` : "";
+  const shopName = data?.shop?.name || "Unknown Shop";
+  const dispatch = useDispatch();
+
+  const removeFromWishListHandler = (data) => {
+    setClick(!click);
+    dispatch(removeFromWishList(data));
+  };
+  const addToWishListHandler = (data) => {
+    setClick(!click);
+
+    dispatch(addToWishList(data));
+  };
+  const addToCartHandle = (id) => {
+    const isItemExists = cart && cart.find((i) => i._id === id);
+    if (isItemExists) {
+      toast.error("Item already in cart");
+    } else {
+      if (data.stock < 1) {
+        toast.error("Product stock limited");
+      } else {
+        const cartData = { ...data, qty: 1 };
+        dispatch(addToCart(cartData));
+        toast.success("Item Add to cart Successfully");
+      }
+    }
+  };
 
   return (
     <>
-      <div className="w-full h-[370px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer">
+      <div className="w-full mx-2 h-[330px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer">
         <div className="flex justify-end"></div>
-        <Link to={`/product/${productName}`}>
+
+        <Link to={`/product/${data._id}`}>
           <img
-            src={data.image_Url[0].url}
+            src={imageUrl}
             alt={data?.name || "Product"}
             className="w-full h-[170px] object-contain"
           />
         </Link>
-        <Link to="/">
-          <h5 className={`${styles.shop_name}`}>{data.shop.name}</h5>
+
+        <Link to={`/shop/preview/${data.shop._id}`}>
+          <h5 className={`${styles.shop_name}`}>{shopName}</h5>
         </Link>
-        <Link to={`/product/${productName}`}>
+
+        <Link to={`/product/${data._id}`}>
           <h4 className="pb-3 font-[500]">
-            {data.name.length > 40 ? data.name.slice(0, 40) + "..." : data.name}
+            {data?.name?.length > 40
+              ? data.name.slice(0, 40) + "..."
+              : data?.name || "No Name"}
           </h4>
 
           <div className="flex">
-            <AiFillStar
-              className="mr-2 cursor-pointer"
-              color="#F6BA00"
-              size={20}
-            />
-            <AiFillStar
-              className="mr-2 cursor-pointer"
-              color="#F6BA00"
-              size={20}
-            />
-            <AiFillStar
-              className="mr-2 cursor-pointer"
-              color="#F6BA00"
-              size={20}
-            />
-            <AiFillStar
-              className="mr-2 cursor-pointer"
-              color="#F6BA00"
-              size={20}
-            />
-            <AiOutlineStar
-              className="mr-2 cursor-pointer"
-              color="#F6BA00"
-              size={20}
-            />
+            {[...Array(4)].map((_, i) => (
+              <AiFillStar key={i} className="mr-2" color="#F6BA00" size={20} />
+            ))}
+            <AiOutlineStar className="mr-2" color="#F6BA00" size={20} />
           </div>
+
           <div className="py-2 flex items-center justify-between">
             <div className="flex">
               <h5 className={`${styles.productDiscountPrice}`}>
-                {data.price === 0 ? data.price : data.discount_price}$
+                {data?.discountPrice + "$"}
               </h5>
-              <h4 className={`${styles.price}`}>
-                {data.price ? data.price + "$" : null}
-              </h4>
+
+              <h6 className="text-red-500 line-through ml-[4px]">
+                {" "}
+                {data?.originalPrice + "$"}
+              </h6>
             </div>
 
             <span className="font-[400] text-[17px] text-[#68d284]">
-              {data.total_sell} sold
+              {data?.sold_out} sold
             </span>
           </div>
         </Link>
-        {/* SIDE OPTIONS */}
 
+        {/* SIDE OPTIONS */}
         <div>
           {click ? (
             <AiFillHeart
               size={22}
               className="cursor-pointer absolute right-2 top-5"
-              onClick={() => setClick(!click)}
-              color={click ? "red" : "#333"}
+              onClick={() => removeFromWishListHandler(data)}
+              color="red"
               title="Remove from wishlist"
             />
           ) : (
             <AiOutlineHeart
               size={22}
               className="cursor-pointer absolute right-2 top-5"
-              onClick={() => setClick(!click)}
-              color={click ? "red" : "#333"}
+              onClick={() => addToWishListHandler(data)}
+              color="#333"
               title="Add to wishlist"
             />
           )}
+
           <AiOutlineEye
             size={22}
             className="cursor-pointer absolute right-2 top-14"
-            onClick={() => setOpen(!open)}
+            onClick={() => {
+              console.log("Quick view clicked!", data._id);
+              setOpen(true);
+            }}
             color="#333"
             title="Quick view"
           />
+
           <AiOutlineShoppingCart
             size={25}
             className="cursor-pointer absolute right-2 top-24"
-            onClick={() => setOpen(!open)}
+            onClick={() => addToCartHandle(data._id)}
             color="#444"
             title="Add to cart"
           />
 
-          {open ? (
-            <ProductDetailCard setOpen={setOpen} data={data} />
-          ) : null}
+          {open && <ProductDetailCard setOpen={setOpen} data={data} />}
         </div>
       </div>
     </>

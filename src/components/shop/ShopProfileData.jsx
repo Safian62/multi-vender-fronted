@@ -1,11 +1,20 @@
-import React, { useState } from "react";
-import {productData} from '../../static/data'
+import React, { useEffect, useState } from "react";
 import ProductCard from '../Route/productCard/productCard'
-import { Link } from "react-router-dom";
+import {getAllProductsShop} from '../../redux/actions/product'
+import { Link, useParams } from "react-router-dom";
 import styles from "../../styles/style";
+import {useDispatch, useSelector} from 'react-redux'
 
 const ShopProfileData = ({ isOwner }) => {
   const [active, setActive] = useState(1);
+
+  const {products} = useSelector((state)=>state.products)
+  const {id} = useParams();
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    dispatch(getAllProductsShop(id))
+  },[dispatch])
+
 
   return (
     <div className="w-full ">
@@ -57,7 +66,7 @@ const ShopProfileData = ({ isOwner }) => {
       <br />
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4 xl:gap-5  mb-12 border-0">
         {
-        productData && productData.map((i,index)=>{
+        products && products?.map((i,index)=>{
           return  <ProductCard data = {i} key={index} isShop={true}/>
         })
         }

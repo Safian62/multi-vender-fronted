@@ -25,7 +25,7 @@ export const createProduct = (newForm) => async (dispatch) => {
   }
 };
 
-// GET ALL PRODUCTS
+// GET ALL PRODUCTS OF SHOP
 
 export const getAllProductsShop = (id) => async (dispatch) => {
   try {
@@ -42,7 +42,7 @@ export const getAllProductsShop = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: "getAllProductsShopFailed",
-      payload: error.response.data.message,
+      payload: error.response?.data.message,
     });
   }
 };
@@ -68,3 +68,24 @@ export const deleteProduct = (id) => async (dispatch) => {
     });
   }
 };
+
+// GET ALL PRODUCTS
+
+export const getAllProducts = () => async(dispatch)=>{
+  try {
+    dispatch({
+      type:"getAllProductRequest"
+    });
+    const {data} = await axios.get(`${server}/product/get-all-products`);
+    console.log("API response from backend:", data)
+    dispatch({
+      type:"getAllProductSuccess",
+      payload:data.product,
+    });
+  } catch (error) {
+      dispatch({
+      type: "getAllProductFailed",
+      payload: error.response?.data.message,
+    });
+  }
+}

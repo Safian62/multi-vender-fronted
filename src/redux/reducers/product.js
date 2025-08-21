@@ -1,12 +1,11 @@
 import { createReducer } from "@reduxjs/toolkit";
 
 const initialState = {
-  isLoading: true,
+  isLoading: false,
 };
 
 export const productReducer = createReducer(initialState, (builder) => {
   builder
-    // CREATE A PRODUCT
     .addCase("productCreateRequest", (state) => {
       state.isLoading = true;
     })
@@ -21,7 +20,6 @@ export const productReducer = createReducer(initialState, (builder) => {
       state.success = false;
     })
 
-    // GET ALL PRODUCTS OF SHOP
     .addCase("getAllProductsShopRequest", (state) => {
       state.isLoading = true;
     })
@@ -34,7 +32,6 @@ export const productReducer = createReducer(initialState, (builder) => {
       state.error = action.payload;
     })
 
-    // DELETE A PRODUCT
     .addCase("deleteProductRequest", (state) => {
       state.isLoading = true;
     })
@@ -45,9 +42,22 @@ export const productReducer = createReducer(initialState, (builder) => {
       );
       state.message = "Product deleted successfully";
     })
-
     .addCase("deleteProductFailed", (state, action) => {
       state.isLoading = false;
+      state.error = action.payload;
+    })
+     
+    
+    .addCase('getAllProductRequest',(state)=>{
+      state.isLoading=true;
+    })
+    .addCase('getAllProductSuccess',(state,action)=>{
+      state.isLoading=false;
+      state.allProducts= action.payload;
+
+    })
+    .addCase('getAllProductFailed',(state,action)=>{
+      state.isLoading=false;
       state.error = action.payload;
     })
     .addCase("clearErrors", (state) => {

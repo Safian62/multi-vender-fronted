@@ -27,7 +27,7 @@ import {
   ShopAllProducts,
   ShopCreateEvents,
   ShopAllEvents,
-  ShopAllCupons
+  ShopAllcoupons,
 } from "./protectedRout/ShopRout.js";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -38,6 +38,9 @@ import { loadShop } from "./redux/actions/user.js";
 import { useSelector } from "react-redux";
 import SellerProtectedRout from "./protectedRout/SellerProtecredRout.js";
 import Loader from "./components/layout/loader.jsx";
+import { getAllEvents } from "./redux/actions/event.js";
+import { getAllProducts } from "./redux/actions/product.js";
+import ShopPreviewPage from "./pages/Shop/ShopPreviewPage.jsx";
 
 const App = () => {
   const { loading, isAuthenticated } = useSelector((state) => state.user);
@@ -45,6 +48,8 @@ const App = () => {
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadShop());
+    Store.dispatch(getAllProducts());
+    Store.dispatch(getAllEvents());
   }, []);
   return (
     <>
@@ -65,14 +70,14 @@ const App = () => {
               element={<SellerActivationPage />}
             />
             <Route path="/products" element={<ProductsPage />} />
-            <Route path="/product/:name" element={<ProductDetailsPage />} />
+            <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/best-selling" element={<BestSellingPage />} />
             <Route path="events" element={<EventsPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route
               path="/checkout"
               element={
-                <ProtectedRout>
+                <ProtectedRout isAuthenticated={isAuthenticated}>
                   <CheckoutPage />
                 </ProtectedRout>
               }
@@ -90,14 +95,10 @@ const App = () => {
             {/* SHOP ROUTE */}
             <Route path="/shop-create" element={<ShopCreatePage />} />
             <Route path="/shop-login" element={<ShopLoginPage />} />
-            <Route
-              path="/shop/:id"
-              element={
-                <SellerProtectedRout isSeller={isSeller}>
-                  <ShopHomePage />
-                </SellerProtectedRout>
-              }
-            />
+
+            <Route path="/shop/:id" element={<ShopHomePage />} />
+            <Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
+
             <Route
               path="/dashboard"
               element={
@@ -130,7 +131,7 @@ const App = () => {
                 </SellerProtectedRout>
               }
             />
-             
+
             <Route
               path="/dashboard-events"
               element={
@@ -140,10 +141,10 @@ const App = () => {
               }
             />
             <Route
-              path="/dashboard-cupons"
+              path="/dashboard-coupons"
               element={
                 <SellerProtectedRout isSeller={isSeller}>
-                  <ShopAllCupons />
+                  <ShopAllcoupons />
                 </SellerProtectedRout>
               }
             />

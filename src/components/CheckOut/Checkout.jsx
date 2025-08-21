@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "../../styles/style";
-import { Country, State } from "country-state-city";
+import { City, Country  } from "country-state-city";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -67,7 +67,8 @@ const Checkout = () => {
     const name = couponCode;
 
     await axios.get(`${server}/coupon/get-coupon-value/${name}`).then((res) => {
-      const shopId = res.data.couponCode?.shopId;
+      
+      const shopId = res.data.couponCode?.shop;
       const couponCodeValue = res.data.couponCode?.value;
       if (res.data.couponCode !== null) {
         const isCouponValid =
@@ -144,7 +145,7 @@ const Checkout = () => {
   );
 };
 
-const ShippingInfo = ({
+const ShippingInfo = ({    
   user,
   country,
   setCountry,
@@ -236,8 +237,8 @@ const ShippingInfo = ({
               <option className="block pb-2" value="">
                 Choose your City
               </option>
-              {State &&
-                State.getStatesOfCountry(country).map((item) => (
+              {City &&
+                City.getCitiesOfCountry(country).map((item) => (
                   <option key={item.isoCode} value={item.isoCode}>
                     {item.name}
                   </option>

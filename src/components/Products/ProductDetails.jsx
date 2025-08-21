@@ -1,18 +1,44 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import styles from "../../styles/style";
+import { getAllProductsShop } from "../../redux/actions/product";
 import {
   AiFillHeart,
   AiOutlineHeart,
   AiOutlineMessage,
   AiOutlineShoppingCart,
 } from "react-icons/ai";
+import { backend_url } from "../../server";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addToWishList,
+  removeFromWishList,
+} from "../../redux/actions/wishList";
+import { toast } from "react-toastify";
+import { addToCart } from "../../redux/actions/cart";
 
 const ProductDetails = ({ data }) => {
+  const { products } = useSelector((state) => state.products);
+  const { wishList } = useSelector((state) => state.wishList);
+  const { cart } = useSelector((state) => state.cart);
+
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getAllProductsShop(data?.shop?._id));
+    if (wishList && wishList.find((i) => i._id === data?.id)) {
+      setClick(true);
+    } else {
+      setClick(false);
+    }
+  }, [wishList, data]);
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(0);
   const navigate = useNavigate();
+  const shopAvatarUrl = data?.shop?.avatar
+    ? `${backend_url}/${data.shop.avatar.url}`
+    : `${process.env.PUBLIC_URL}/images/default-avatar.png`;
 
   function increment() {
     setCount(count + 1);
@@ -26,6 +52,33 @@ const ProductDetails = ({ data }) => {
   const handleMessageSubmit = () => {
     navigate("/inbox?conservation=507ebjver884chfgjerive84");
   };
+  const imageUrl = data?.images[select]
+    ? `${backend_url}/${data.images[select]}`
+    : "";
+
+  const removeFromWishListHandler = (data) => {
+    setClick(!click);
+    dispatch(removeFromWishList(data));
+  };
+  const addToWishListHandler = (data) => {
+    setClick(!click);
+
+    dispatch(addToWishList(data));
+  };
+  const addToCartHandle = (id) => {
+    const isItemExists = cart && cart.find((i) => i._id === id);
+    if (isItemExists) {
+      toast.error("Item already in cart");
+    } else {
+      if (data.stock < count) {
+        toast.error("Product stock limited");
+      } else {
+        const cartData = { ...data, qty: count };
+        dispatch(addToCart(cartData));
+        toast.success("Item Add to cart Successfully");
+      }
+    }
+  };
   return (
     <div className="bg-white">
       {data ? (
@@ -35,36 +88,28 @@ const ProductDetails = ({ data }) => {
             <div className=" w-full 800px:flex">
               {/* LEFT SIDE CONTENT */}
               <div className="w-full 800px:[50%]">
-                <img
-                  src={data.image_Url[select].url}
-                  alt=""
-                  className="w-[80%]"
-                />
-                <div className="w-full flex">
-                  <div
-                    className={`${
-                      select === 0 ? "border" : "null"
-                    } cursor-pointer`}
-                  >
-                    <img
-                      src={data?.image_Url[0].url}
-                      alt=""
-                      className="h-[200px]"
-                      onClick={() => setSelect(0)}
-                    />
-                  </div>
+                <img src={imageUrl} alt="" className="w-[80%]" />
+                <div className="w-full flex flex-wrap">
+                  {data &&
+                    data.images.map((i, index) => (
+                      <div
+                        className={`${
+                          select === 0 ? "border" : "null"
+                        } cursor-pointer`}
+                      >
+                        <img
+                          src={`${backend_url} ${i}`}
+                          alt=""
+                          className="h-[200px] overflow-hidden m-2 "
+                          onClick={() => setSelect(index)}
+                        />
+                      </div>
+                    ))}
                   <div
                     className={`${
                       select === 1 ? "border" : "null"
                     } cursor-pointer`}
-                  >
-                    <img
-                      src={data?.image_Url[1].url}
-                      alt=""
-                      className="h-[200px]"
-                      onClick={() => setSelect(1)}
-                    />
-                  </div>
+                  ></div>
                 </div>
               </div>
               {/* RIGHT SIDE CONTENT */}
@@ -74,10 +119,10 @@ const ProductDetails = ({ data }) => {
                 {/* PRICE */}
                 <div className="flex pt-3">
                   <h4 className={`${styles.productDiscountPrice}`}>
-                    {data.discount_price}$
+                    {data.discountPrice}$
                   </h4>
                   <h3 className={`${styles.price}`}>
-                    {data.price ? data.price + "$" : null}
+                    {data.originalPrice ? data.originalPrice + "$" : null}
                   </h3>
                 </div>
                 {/* BUTTONS */}
@@ -109,7 +154,7 @@ const ProductDetails = ({ data }) => {
                         <AiFillHeart
                           size={30}
                           className="cursor-pointer "
-                          onClick={() => setClick(!click)}
+                          onClick={() => removeFromWishListHandler(data)}
                           color={click ? "red" : "#333"}
                           title="Remove from wishlist"
                         />
@@ -117,7 +162,7 @@ const ProductDetails = ({ data }) => {
                         <AiOutlineHeart
                           size={30}
                           className="cursor-pointer "
-                          onClick={() => setClick(!click)}
+                          onClick={() => addToWishListHandler(data)}
                           color={click ? "red" : "#333"}
                           title="Add to wishlist"
                         />
@@ -128,6 +173,7 @@ const ProductDetails = ({ data }) => {
                 {/* BUTTONS */}
                 <div
                   className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
+                  onClick={() => addToCartHandle(data._id)}
                 >
                   <span className="text-white flex items-center">
                     Add to cart <AiOutlineShoppingCart />{" "}
@@ -136,18 +182,20 @@ const ProductDetails = ({ data }) => {
 
                 {/* SEND MESSAGE */}
                 <div className="flex items-center pt-8 ">
-                  <img
-                    src={data.shop.shop_avatar.url}
-                    alt=""
-                    className="w-[50px] h-[50px] rounded-full mr-2"
-                  />
+                  <Link to={`/shop/preview/${data.shop._id}`}>
+                    <img
+                      src={shopAvatarUrl}
+                      alt=""
+                      className="w-[50px] h-[50px] rounded-full mr-2"
+                    />
+                  </Link>
                   <div className="pr-8">
-                    <h3 className={`${styles.shop_name} pt-1`}>
-                      {data.shop.name}
-                    </h3>
-                    <h5 className="pb-3 text-[15px]">
-                      ({data.shop.ratings})Ratings
-                    </h5>
+                    <Link to={`/shop/preview/${data.shop._id}`}>
+                      <h3 className={`${styles.shop_name} pt-1`}>
+                        {data.shop.name}
+                      </h3>
+                    </Link>
+                    <h5 className="pb-3 text-[15px]">(4/5)Ratings</h5>
                   </div>
                   <div
                     className={`${styles.button} bg-[#6443d1] !rounded !h-11`}
@@ -162,7 +210,7 @@ const ProductDetails = ({ data }) => {
             </div>
           </div>
           {/* BOTTOM COMPONENT && MORE  INFORMATION ABOUT PRODUCT */}
-          <ProductDetailsInfo data={data} />
+          <ProductDetailsInfo data={data} products={products} />
           <br />
           <br />
         </div>
@@ -171,7 +219,7 @@ const ProductDetails = ({ data }) => {
   );
 };
 
-const ProductDetailsInfo = ({ data }) => {
+const ProductDetailsInfo = ({ data, products }) => {
   const [active, setActive] = useState(1);
 
   return (
@@ -219,33 +267,7 @@ const ProductDetailsInfo = ({ data }) => {
       {active === 1 ? (
         <>
           <p className="py-2 text-[18px] leading-8 pb-10 whitespace-pre-line">
-            Products details are critical parts of any websites or online
-            marketplace These helps potential customers to make and informed
-            decision Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Enim debitis ratione necessitatibus sequi! Numquam et culpa, a odio
-            nisi rem quasi porro perferendis, necessitatibus sequi assumenda
-            quos voluptatem, itaque nam! Lorem, ipsum dolor sit amet consectetur
-            adipisicing elit. Doloremque odio mollitia animi deserunt?
-            Repellendus, odio! Eos et quisquam deserunt eligendi natus. Aliquid
-            eligendi nihil velit aut autem perspiciatis temporibus modi?
-          </p>
-          <p className=" py-2 text-[18px] leading-8 pb-10 whitespace-pre-line">
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatum
-            reiciendis maxime excepturi enim earum quae. Assumenda itaque
-            explicabo eveniet quos deleniti. Quae repellat voluptatum, ea alias
-            id provident minima dolore. Lorem ipsum, dolor sit amet consectetur
-            adipisicing elit. Nisi, atque. Dolores officia eum repellendus nam
-            voluptas iusto culpa, aliquam sint at atque repellat voluptatem, aut
-            iste ratione eaque ducimus aperiam.
-          </p>
-          <p className=" py-2 text-[18px] leading-8 pb-10 whitespace-pre-line">
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatum
-            reiciendis maxime excepturi enim earum quae. Assumenda itaque
-            explicabo eveniet quos deleniti. Quae repellat voluptatum, ea alias
-            id provident minima dolore. Lorem ipsum, dolor sit amet consectetur
-            adipisicing elit. Nisi, atque. Dolores officia eum repellendus nam
-            voluptas iusto culpa, aliquam sint at atque repellat voluptatem, aut
-            iste ratione eaque ducimus aperiam.
+            {data.description}
           </p>
         </>
       ) : null}
@@ -255,35 +277,36 @@ const ProductDetailsInfo = ({ data }) => {
       {active === 3 && (
         <div className="w-full sm:flex justify-between 800px:flex p-5">
           <div className="w-full block 800px:w-[50%]">
-            <div className="flex items-center">
-              <img
-                src={data.shop.shop_avatar.url}
-                className="w-[50px] h-[50px] rounded-full"
-                alt=""
-              />
-              <div className="pl-3">
-                <h3 className={`${styles.shop_name}`}>{data.shop.name}</h3>
-                <h4 className="pb-3 text-[15px]">
-                  ({data.shop.ratings}) Ratings
-                </h4>
+            <Link to={`/shop/preview/${data.shop._id}`}>
+              <div className="flex items-center">
+                <img
+                  src={`${backend_url}${data?.shop?.avatar}`}
+                  className="w-[50px] h-[50px] rounded-full"
+                  alt=""
+                />
+                <div className="pl-3">
+                  <h3 className={`${styles.shop_name}`}>{data.shop.name}</h3>
+                  <h4 className="pb-3 text-[15px]">(4/5) Ratings</h4>
+                </div>
               </div>
-            </div>
-            <p className="pt-3 ">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Rem,
-              odit non. Tempora voluptatum odio corrupti hic doloremque et
-              labore praesentium neque excepturi eos mollitia exercitationem
-              natus tenetur, perspiciatis, quasi deserunt.
-            </p>
+            </Link>
+            <p className="pt-3 ">{data.shop.description}</p>
           </div>
           <div className=" 800px:w-[50p%] mt-5 800px:mt-0 800px:flex flex-col items-center">
             <div className="text-left">
               <h5 className="font-[700]">
                 {" "}
-                Joined on: <span className="font-[500]">29 august,2025</span>
+                Joined on:{" "}
+                <span className="font-[500]">
+                  {data.shop?.createdAt?.slice(0, 10)}
+                </span>
               </h5>
               <h5 className="font-[700] pt-3">
                 {" "}
-                Total Products: <span className="font-[500]">1,100</span>
+                Total Products:{" "}
+                <span className="font-[500]">
+                  {products && products.length}
+                </span>
               </h5>
               <h5 className="font-[700] pt-3">
                 {" "}
@@ -291,7 +314,9 @@ const ProductDetailsInfo = ({ data }) => {
               </h5>
               <Link to="/">
                 <div className={`${styles.button} rounded !h-[40px] mt-3`}>
-                  <h4 className="text-white font-semibold text-[18px]">Visit Shop</h4>
+                  <h4 className="text-white font-semibold text-[18px]">
+                    Visit Shop
+                  </h4>
                 </div>
               </Link>
             </div>

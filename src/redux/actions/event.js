@@ -78,3 +78,25 @@ export const getAllEventsShop = (id) => async (dispatch) => {
     });
    }
   }
+
+
+// GET ALL EVENTS
+// GET ALL EVENTS
+export const getAllEvents = () => async (dispatch) => {
+  try {
+    dispatch({ type: "getAlleventsRequest" }); // ✅ request action
+
+    const { data } = await axios.get(`${server}/event/get-all-events`);
+    console.log("Events API response:", data); // 🔍 check payload
+
+    dispatch({
+      type: "getAlleventsSuccess", // ✅ success action
+      payload: data?.events || [],  // ✅ safe fallback
+    });
+  } catch (error) {
+    dispatch({
+      type: "getAlleventsFail", // ✅ fail action
+      payload: error.response?.data?.message || error.message,
+    });
+  }
+};

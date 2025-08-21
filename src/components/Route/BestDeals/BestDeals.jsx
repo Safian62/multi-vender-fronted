@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { productData } from "../../../static/data";
 import styles from "../../../styles/style";
 import ProductCard from "../productCard/productCard";
+import { useSelector } from "react-redux";
 
 const BestDeals = () => {
   const [data, setData] = useState([]);
-  useEffect(() => {
-    const d =
-      productData && productData.sort((a, b) => b.total_sell - a.total_sell);
-    const firstFive = d.slice(0, 5);
-    setData(firstFive);
-  }, []);
-  return (
+  const {allProducts} = useSelector((state)=> state.products)
+  
+  useEffect(()=>{
+    const firstFive =allProducts &&  allProducts.slice(0,5)
+    setData(firstFive)
+  },[allProducts])
+  return (  
     <div>
       <div className={`${styles.section}`}>
         <div className={`${styles.heading}`}>

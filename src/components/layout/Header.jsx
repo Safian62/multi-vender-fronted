@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "../../styles/style";
 import { Link } from "react-router-dom";
-import { categoriesData, productData } from "../../static/data";
+import { categoriesData,  } from "../../static/data";
 import Cart from "../Cart/Cart";
 import Wish from "../Wishlist/Wishlist.jsx";
 import { backend_url } from "../../server.js";
@@ -21,6 +21,11 @@ import { RxCross1 } from "react-icons/rx";
 
 const Header = ({ activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
+  const { cart } = useSelector((state) => state.cart);
+  const { wishList } = useSelector((state) => state.wishList);
+
+  const { allProducts } = useSelector((state) => state.products);
+
   const avatarUrl = user?.avatar?.url;
   const fullAvatarUrl =
     avatarUrl && !avatarUrl.startsWith("http")
@@ -36,12 +41,13 @@ const Header = ({ activeHeading }) => {
   // console.log("User from Redux:", user);
 
   const handleSearchChange = (e) => {
+
     const term = e.target.value;
     setSearchTerm(term);
 
     const filturedProducts =
-      productData &&
-      productData.filter((product) =>
+      allProducts &&
+      allProducts.filter((product) =>
         product.name.toLowerCase().includes(term.toLowerCase())
       );
 
@@ -88,12 +94,12 @@ const Header = ({ activeHeading }) => {
             {searchData?.length > 0 && (
               <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
                 {searchData.map((i, index) => {
-                  const product_name = i.name.replace(/\s+/g, "-");
+               
                   return (
-                    <Link key={index} to={`/product/${product_name}`}>
+                    <Link key={index} to={`/product/${i._id}`}>
                       <div className="w-full flex items-start py-3">
                         <img
-                          src={i.image_Url[0].url}
+                          src={`${backend_url}/${i.images[0]}`}
                           className="w-[40px] h-[40px] mr-[10px]"
                           alt=""
                         />
@@ -162,7 +168,7 @@ const Header = ({ activeHeading }) => {
               >
                 <AiOutlineHeart size={30} color="rgb(255 255 255 / 83%)" />
                 <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 text-white font-mono text-[12px] leading-tight text-center">
-                  0
+                  {wishList && wishList.length}
                 </span>
               </div>
             </div>
@@ -180,7 +186,9 @@ const Header = ({ activeHeading }) => {
                   color="rgb(255 255 255 / 83%)"
                 />
                 <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 text-white font-mono text-[12px] leading-tight text-center">
-                  0
+                 {
+                    cart && cart.length
+                  }
                 </span>
               </div>
             </div>
@@ -240,7 +248,7 @@ const Header = ({ activeHeading }) => {
           <div className="relative mr-[20px] ">
             <AiOutlineShoppingCart size={40} />
             <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 text-white font-mono text-[12px] leading-tight text-center">
-              0
+              {cart && cart.length}
             </span>{" "}
           </div>
         </div>
